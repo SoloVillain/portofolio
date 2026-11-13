@@ -7,11 +7,13 @@
   const pad = n => String(n).padStart(2, "0");
 
   const html         = document.documentElement;
-  // Cek apakah perangkat punya kursor (PC/Laptop) atau sentuh (HP)
-  const isTouch     = matchMedia("(pointer: coarse)").matches;
+  const isTouch      = matchMedia("(pointer: coarse)").matches;
   const canHover     = !isTouch;
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const mouse        = { x: innerWidth / 2, y: innerHeight / 2 };
+
+  // SVG Panah (Menggantikan karakter teks ↗ agar tidak jadi emoji di HP)
+  const ARROW_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>`;
 
   const projects = typeof PROJECTS !== "undefined" ? PROJECTS : [];
   if (!projects.length) console.error("projects.js tidak terbaca.");
@@ -19,7 +21,7 @@
   let lenis = null;
   const HEADER_OFFSET = 70;
 
-  /* ===== 0. SMOOTH SCROLL (OPTIMASI: Hanya di PC) ===== */
+  /* ===== 0. SMOOTH SCROLL (Hanya di PC) ===== */
   function initSmoothScroll(){
     document.addEventListener("click", e => {
       const a = e.target.closest('a[href^="#"]');
@@ -41,20 +43,10 @@
       try { history.replaceState(null, "", href); } catch (err) {}
     });
 
-    // JIKA HP / TOUCHSCREEN: Jangan inisialisasi Lenis (Hemat RAM & Baterai)
     if (isTouch || typeof window.Lenis !== "function") return;
 
-    lenis = new window.Lenis({
-      lerp: 0.1,
-      wheelMultiplier: 1,
-      smoothWheel: true,
-      syncTouch: false, // Pastikan sentuhan tidak di-lock
-    });
-
-    function raf(time){
-      lenis.raf(time);
-      requestAnimationFrame(raf);
-    }
+    lenis = new window.Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false });
+    function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
     requestAnimationFrame(raf);
   }
 
@@ -125,13 +117,14 @@
   function renderProjectList(){
     const box = $("#projs");
     if (!box) return;
+    // Menyisipkan SVG Arrow ke dalam list
     box.innerHTML = projects.map((p, i) =>
       `<a class="proj" href="#/work/${p.id}" data-img="${p.images[0] || ""}" data-grad="${p.grad}">
         <span class="n">${pad(i + 1)}</span>
         <h3>${p.title}</h3>
         <span class="t">${p.tags}</span>
         <span class="y">${p.year}</span>
-        <span class="ar">↗</span>
+        <span class="ar">${ARROW_SVG}</span>
       </a>`
     ).join("");
   }
@@ -170,7 +163,6 @@
     });
   }
 
-  /* ===== 9. KURSOR & PREVIEW (OPTIMASI: Matikan di HP) ===== */
   const follow = { cx: mouse.x, cy: mouse.y, px: mouse.x, py: mouse.y };
   function initCursor(){
     if (!canHover) return;
@@ -204,7 +196,7 @@
       stopAutoSlide();
       if (frames.length <= 1) return;
       autoSlideInterval = setInterval(() => {
-        if (!document.hidden) setActive(active + 1); // Hanya jalan kalau tab aktif
+        if (!document.hidden) setActive(active + 1);
       }, 4000);
     }
     function stopAutoSlide() { if (autoSlideInterval) clearInterval(autoSlideInterval); autoSlideInterval = null; }
@@ -227,8 +219,9 @@
         </button>`
       ).join("");
 
-      const links = (p.live ? `<a class="btn fill" href="${p.live}" target="_blank" rel="noopener noreferrer">Live Demo ↗</a>` : "") +
-                    (p.github ? `<a class="btn line" href="${p.github}" target="_blank" rel="noopener noreferrer">GitHub ↗</a>` : "") ||
+      // Link pakai SVG Arrow
+      const links = (p.live ? `<a class="btn fill" href="${p.live}" target="_blank" rel="noopener noreferrer">Live Demo ${ARROW_SVG}</a>` : "") +
+                    (p.github ? `<a class="btn line" href="${p.github}" target="_blank" rel="noopener noreferrer">GitHub ${ARROW_SVG}</a>` : "") ||
                     '<span class="d-none">Belum ada link publik.</span>';
 
       content.style.setProperty("--g", p.grad);
@@ -259,7 +252,6 @@
 
       stage.addEventListener("mouseenter", stopAutoSlide);
       stage.addEventListener("mouseleave", startAutoSlide);
-
       enableSwipe();
     }
 
@@ -303,7 +295,6 @@
       detail.setAttribute("aria-hidden", "false");
       document.body.classList.add("no-scroll");
       if (wasClosed) $("#d-close").focus({ preventScroll: true });
-
       startAutoSlide();
     }
 
@@ -345,7 +336,7 @@
     return { route };
   }
 
-  /* ===== 11. LOOP ANIMASI (OPTIMASI RAM) ===== */
+  /* ===== 11. LOOP ANIMASI ===== */
   function initLoop(){
     const cursor = $("#cursor"), preview = $("#preview"), photo = $("#photo-wrap");
     const heroText = $("#hero-text"), bar = $("#progress"), track = $("#track"), header = $(".top");
@@ -355,14 +346,10 @@
     let lastY = scrollY, speed = 1, rate = 1;
     header.classList.toggle("scrolled", scrollY > 40);
 
-    const PARALLAX = (!reduceMotion && !isTouch) ? 0.08 : 0; // Matikan parallax di HP
+    const PARALLAX = (!reduceMotion && !isTouch) ? 0.08 : 0;
 
     function frame(){
-      // JIKA TAB TIDAK AKTIF, JANGAN HITUNG APA PUN (Hemat Baterai)
-      if (document.hidden) {
-        requestAnimationFrame(frame);
-        return;
-      }
+      if (document.hidden) { requestAnimationFrame(frame); return; }
 
       if (canHover) {
         follow.cx += (mouse.x - follow.cx) * 0.2;
@@ -374,8 +361,6 @@
       }
 
       const y = scrollY;
-      
-      // Hero fade (Hanya PC)
       if (!isTouch && !reduceMotion && y < innerHeight && heroText) {
         const p = y / innerHeight;
         heroText.style.opacity = Math.max(0, 1 - p * 1.5);
@@ -411,7 +396,6 @@
     });
   }
 
-  /* ===== 13. JALANKAN SEMUANYA ===== */
   const safe = fn => { try { return fn(); } catch (e) { console.error("Error di " + (fn.name || "fungsi") + ":", e); } };
 
   safe(initSmoothScroll);
