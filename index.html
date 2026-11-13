@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 
-  <noscript><style>.loader{display:none}.fu,.line>span,.top,.photo{opacity:1!important;transform:none!important;clip-path:none!important}.rv:not(.show),[data-stagger]:not(.show)>*{opacity:1!important}</style></noscript>
+  <noscript><style>.loader{display:none}.fu,.line>span,.top,.photo{opacity:1!important;transform:none!important;clip-path:none!important}.rv,[data-stagger]>*{opacity:1!important;transform:none!important;filter:none!important}</style></noscript>
 </head>
 <body>
 
@@ -45,7 +45,7 @@
 
     <!-- ===== 1. HERO ===== -->
     <section class="hero" id="home">
-      <div class="hero-text">
+      <div class="hero-text" id="hero-text">
         <div class="eyebrow fu" style="--d:.5">Portfolio — 2026</div>
 
         <h1>
@@ -149,7 +149,7 @@
     </div>
   </div>
 
-  <!-- Lenis (smooth scroll) — dari jsDelivr, lebih stabil dari unpkg -->
+  <!-- Lenis (smooth scroll) -->
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
   <script src="projects.js"></script>
   <script src="script.js"></script>
