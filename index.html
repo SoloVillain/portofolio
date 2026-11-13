@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Muhammad Addia Prasetyo Akbar | Web Developer</title>
+  <meta name="description" content="Portofolio web developer dan UI/UX designer.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+
+  <!-- jika JavaScript mati, jangan kunci halaman -->
+  <noscript><style>.loader{display:none}.fu,.line>span,.top,.photo{opacity:1!important;transform:none!important;clip-path:none!important}.rv:not(.show),[data-stagger]:not(.show)>*{opacity:1!important}</style></noscript>
+</head>
+<body>
+
+  <!-- ===== LOADER ===== -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <span class="loader-name">Muhammad Addia Prasetyo Akbar ®</span>
+    <span class="loader-num"><span id="loader-num">0</span>%</span>
+  </div>
+
+  <!-- ===== EFEK KURSOR & PROGRESS ===== -->
+  <div class="cursor" id="cursor"></div>
+  <div class="progress" id="progress"></div>
+
+  <!-- ===== HEADER ===== -->
+  <header class="top">
+    <a href="#home" class="logo">Akbar ®</a>
+    <nav id="nav">
+      <a href="#home" class="active">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#work">Work</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div class="tools">
+      <button class="tbtn" id="theme">Light</button>
+      <button class="burger" id="burger">Menu</button>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ===== 1. HERO ===== -->
+    <section class="hero" id="home">
+      <div class="hero-text">
+        <div class="eyebrow fu" style="--d:.5">Portfolio — 2026</div>
+
+        <h1>
+          <span class="line"><span style="--i:0">Halo, saya</span></span>
+          <span class="line"><span style="--i:1"><em>Muhammad</em> Addia</span></span>
+          <span class="line"><span style="--i:2"><em>Prasetyo</em> Akbar</span></span>
+        </h1>
+
+        <p class="role fu" style="--d:.9">Saya seorang <b><span id="typing"></span></b><span class="caret"></span></p>
+
+        <div class="cta fu" style="--d:1.05">
+          <a href="#work" class="btn fill">Lihat Karya</a>
+          <a href="img/cv.pdf" download class="btn line">Download CV</a>
+        </div>
+
+        <div class="links fu" style="--d:1.2">
+          <a href="#">Instagram ↗</a>
+          <a href="https://github.com/SoloVillain">GitHub ↗</a>
+        </div>
+      </div>
+
+      <div class="photo-wrap" id="photo-wrap">
+        <div class="photo">A<img src="img/foto.jpg" alt="Foto profil" onerror="this.remove()"></div>
+      </div>
+    </section>
+
+    <!-- ===== 2. MARQUEE ===== -->
+    <div class="marquee"><div class="track" id="track">
+      <span>HTML</span><span>CSS</span><span>JavaScript</span><span>React</span><span>Next.js</span><span>Laravel</span><span>MySQL</span><span>UI/UX</span><span>Three.js</span>
+    </div></div>
+
+    <!-- ===== 3. ABOUT ===== -->
+    <section class="s" id="about">
+      <div class="label rv">01 — About</div>
+      <p class="big rv">Saya developer yang suka membangun website responsif dan mengeksplorasi hal baru di dunia digital. <span>Coding bagi saya bukan sekadar pekerjaan, tapi cara berekspresi dan memecahkan masalah secara kreatif. Di luar ngoding, saya seorang gamer yang senang berbagi momen seru bersama komunitas.</span></p>
+      <div class="stats" data-stagger>
+        <div class="stat"><b data-count="10">0</b><span>Proyek selesai</span></div>
+        <div class="stat"><b data-count="3">0</b><span>Tahun belajar</span></div>
+        <div class="stat"><b data-count="5">0</b><span>Teknologi dikuasai</span></div>
+      </div>
+    </section>
+
+    <!-- ===== 4. SERVICES ===== -->
+    <section class="s" id="services">
+      <div class="label rv">02 — Services</div>
+      <div class="svc" data-stagger>
+        <div class="row" tabindex="0"><span class="n">/01</span><h3>Web Development</h3><p>Membuat website fungsional dan responsif dari awal menggunakan teknologi terbaru. Fokus pada performa dan kecepatan.</p></div>
+        <div class="row" tabindex="0"><span class="n">/02</span><h3>UI/UX Design</h3><p>Merancang interface yang tidak hanya bagus dilihat, tetapi juga intuitif bagi pengguna.</p></div>
+        <div class="row" tabindex="0"><span class="n">/03</span><h3>3D Interactive</h3><p>Menghidupkan elemen website biasa menjadi objek interaktif 3D layaknya kanvas seni ruang.</p></div>
+      </div>
+    </section>
+
+    <!-- ===== 5. WORK (daftar dibuat otomatis dari projects.js) ===== -->
+    <section class="s" id="work">
+      <div class="label rv">03 — Selected Work</div>
+      <div class="projs" id="projs" data-stagger></div>
+      <div id="preview"></div>
+    </section>
+
+    <!-- ===== 6. TOOLBOX ===== -->
+    <section class="s" id="skills">
+      <div class="label rv">04 — Toolbox</div>
+      <div class="chips" data-stagger>
+        <span>HTML</span><span>CSS</span><span>JavaScript</span><span>PHP</span><span>Laravel</span><span>React</span><span>Next.js</span><span>Node.js</span><span>Express</span><span>MySQL</span><span>Flutter</span><span>Figma</span><span>Git</span>
+      </div>
+    </section>
+
+    <!-- ===== 7. CONTACT ===== -->
+    <section class="s" id="contact">
+      <div class="label rv">05 — Contact</div>
+      <a class="mail rv" href="mailto:emailkamu@gmail.com">Ayo kerja bareng ↗</a>
+
+      <form id="form" name="kontak" method="POST" data-netlify="true" data-stagger>
+        <input type="hidden" name="form-name" value="kontak">
+        <input type="text" name="nama" placeholder="Nama lengkap" required>
+        <input type="email" name="email" placeholder="Alamat email" required>
+        <input class="full" type="text" name="subjek" placeholder="Subjek" required>
+        <textarea class="full" name="pesan" rows="5" placeholder="Pesan kamu" required></textarea>
+        <button class="btn fill" type="submit">Kirim Pesan</button>
+        <div id="toast" role="status"></div>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <span>© 2026 Muhammad Addia Prasetyo Akbar. All rights reserved.</span>
+    <a href="#home">Kembali ke atas ↑</a>
+  </footer>
+
+  <!-- ===== HALAMAN DETAIL PROYEK (isinya diisi oleh script.js) ===== -->
+  <div class="detail" id="detail" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Detail proyek">
+    <div class="d-top">
+      <span class="d-count" id="d-count">01 / 04</span>
+      <button class="d-close" id="d-close" aria-label="Tutup detail proyek">&gt; Close &lt;</button>
+      <span class="d-brand">Akbar ®</span>
+    </div>
+    <div class="d-scroll" id="d-scroll">
+      <div id="d-content"></div>
+    </div>
+  </div>
+
+  <script src="projects.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
