@@ -1,20 +1,3 @@
-/* =====================================================
-   DAFTAR ISI
-   1. Helper & state
-   2. Tema gelap / terang
-   3. Loader
-   4. Efek mengetik
-   5. Menu mobile & menu aktif
-   6. Daftar proyek (dibuat dari projects.js)
-   7. Reveal saat scroll + hitung angka
-   8. Tombol magnetik
-   9. Kursor & preview proyek
-  10. Halaman detail proyek
-  11. Loop animasi (parallax, progress, marquee)
-  12. Form kontak
-  13. Jalankan semuanya
-   ===================================================== */
-
 (() => {
   "use strict";
 
@@ -28,30 +11,66 @@
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const mouse        = { x: innerWidth / 2, y: innerHeight / 2 };
 
-  // data dari projects.js (kalau file itu tidak terbaca, halaman tetap jalan)
   const projects = typeof PROJECTS !== "undefined" ? PROJECTS : [];
-  if (!projects.length) console.error("projects.js tidak terbaca atau kosong. Pastikan file ada di folder yang sama dengan index.html.");
+  if (!projects.length) console.error("projects.js tidak terbaca atau kosong.");
 
+  let lenis = null;
+  const HEADER_OFFSET = 70;
 
-  /* ===== 2. TEMA GELAP / TERANG ===== */
+  /* ===== 0. SMOOTH SCROLL ===== */
+  function initSmoothScroll(){
+    document.addEventListener("click", e => {
+      const a = e.target.closest('a[href^="#"]');
+      if (!a) return;
+      const href = a.getAttribute("href");
+      if (!href || href === "#" || href.startsWith("#/")) return;
+      let target;
+      try { target = document.querySelector(href); } catch (err) { return; }
+      if (!target) return;
+
+      e.preventDefault();
+
+      if (lenis){
+        lenis.scrollTo(target, { offset: -HEADER_OFFSET, duration: 1.2 });
+      } else {
+        const top = target.getBoundingClientRect().top + window.scrollY - HEADER_OFFSET;
+        window.scrollTo({ top, behavior: "smooth" });
+      }
+      try { history.replaceState(null, "", href); } catch (err) {}
+    });
+
+    if (typeof window.Lenis !== "function") return;
+
+    lenis = new window.Lenis({
+      lerp: 0.1,
+      wheelMultiplier: 1,
+      touchMultiplier: 1.4,
+      smoothWheel: true,
+      syncTouch: false,
+    });
+
+    function raf(time){
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+  }
+
+  /* ===== 2. TEMA ===== */
   function initTheme(){
     const btn = $("#theme");
-
     function setTheme(mode){
       html.setAttribute("data-theme", mode);
       btn.textContent = mode === "dark" ? "Light" : "Dark";
       try { localStorage.setItem("theme", mode); } catch (e) {}
     }
-
     let saved = "dark";
     try { saved = localStorage.getItem("theme") || "dark"; } catch (e) {}
     setTheme(saved);
-
     btn.addEventListener("click", () => {
       setTheme(html.getAttribute("data-theme") === "dark" ? "light" : "dark");
     });
   }
-
 
   /* ===== 3. LOADER ===== */
   function initLoader(onReady){
@@ -61,19 +80,18 @@
 
     function tick(now){
       const p = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - p, 3);          // melambat di akhir
+      const eased = 1 - Math.pow(1 - p, 3);
       num.textContent = Math.round(eased * 100);
       if (p < 1) return requestAnimationFrame(tick);
 
-      document.body.classList.add("loaded");         // loader naik ke atas
+      document.body.classList.add("loaded");
       setTimeout(() => {
-        html.classList.add("ready");                 // animasi hero dimulai
+        html.classList.add("ready");
         onReady();
       }, 500);
     }
     requestAnimationFrame(tick);
   }
-
 
   /* ===== 4. EFEK MENGETIK ===== */
   function initTyping(){
@@ -95,8 +113,7 @@
     })();
   }
 
-
-  /* ===== 5. MENU MOBILE & MENU AKTIF ===== */
+  /* ===== 5. MENU MOBILE ===== */
   function initNav(){
     const nav = $("#nav"), burger = $("#burger");
 
@@ -109,7 +126,6 @@
       burger.textContent = "Menu";
     }));
 
-    // tandai menu sesuai section yang sedang terlihat
     const links = $$("a", nav);
     const io = new IntersectionObserver(entries => entries.forEach(e => {
       if (!e.isIntersecting) return;
@@ -121,11 +137,10 @@
     $$("main section[id]").forEach(s => io.observe(s));
   }
 
-
-  /* ===== 6. DAFTAR PROYEK (dibuat dari projects.js) ===== */
+  /* ===== 6. DAFTAR PROYEK ===== */
   function renderProjectList(){
     const box = $("#projs");
-    if (!box) return console.error("Elemen #projs tidak ada. Pastikan index.html adalah versi terbaru.");
+    if (!box) return;
     box.innerHTML = projects.map((p, i) =>
       '<a class="proj" href="#/work/' + p.id + '"' +
       ' data-img="' + (p.images[0] || "") + '" data-grad="' + p.grad + '">' +
@@ -138,10 +153,8 @@
     ).join("");
   }
 
-
-  /* ===== 7. REVEAL SAAT SCROLL + HITUNG ANGKA ===== */
+  /* ===== 7. REVEAL & HITUNG ANGKA ===== */
   function initReveal(){
-    // beri nomor urut ke anak-anak agar munculnya bergantian
     $$("[data-stagger]").forEach(parent => {
       [...parent.children].forEach((child, i) => child.style.setProperty("--i", i));
     });
@@ -167,7 +180,6 @@
     $$(".rv, [data-stagger]").forEach(el => io.observe(el));
   }
 
-
   /* ===== 8. TOMBOL MAGNETIK ===== */
   function initMagnetic(){
     if (!canHover) return;
@@ -182,8 +194,7 @@
     });
   }
 
-
-  /* ===== 9. KURSOR & PREVIEW PROYEK ===== */
+  /* ===== 9. KURSOR & PREVIEW ===== */
   const follow = { cx: mouse.x, cy: mouse.y, px: mouse.x, py: mouse.y };
 
   function initCursor(){
@@ -194,11 +205,9 @@
     window.addEventListener("mousemove", e => {
       mouse.x = e.clientX; mouse.y = e.clientY;
       cursor.classList.add("on");
-    });
+    }, { passive: true });
     document.addEventListener("mouseleave", () => cursor.classList.remove("on"));
 
-    // kursor membesar di atas elemen yang bisa diklik
-    // (delegasi event, jadi elemen detail yang dibuat belakangan ikut terdeteksi)
     const hoverable = "a, button, .row, .chips span, .d-frame";
     document.addEventListener("mouseover", e => {
       if (e.target.closest(hoverable)) cursor.classList.add("big");
@@ -207,7 +216,6 @@
       if (e.target.closest(hoverable)) cursor.classList.remove("big");
     });
 
-    // preview gambar saat hover baris proyek
     $$(".proj").forEach(p => {
       p.addEventListener("mouseenter", () => {
         const img = p.dataset.img ? "url('" + p.dataset.img + "')," : "";
@@ -218,12 +226,7 @@
     });
   }
 
-
-  /* ===== 10. HALAMAN DETAIL PROYEK =====
-     Alamatnya memakai hash:  #/work/stockin
-     - klik baris proyek  -> hash berubah -> detail terbuka
-     - tombol Back browser / Esc / Close -> detail tertutup
-     - link detail bisa dibagikan, langsung membuka proyeknya */
+  /* ===== 10. HALAMAN DETAIL PROYEK ===== */
   function initDetail(){
     const detail  = $("#detail");
     const content = $("#d-content");
@@ -231,26 +234,45 @@
     const counter = $("#d-count");
     const preview = $("#preview");
 
-    let current = null;      // proyek yang sedang terbuka
-    let active  = 0;         // gambar yang sedang di tengah galeri
-    let savedY  = null;      // posisi scroll halaman sebelum detail dibuka
+    let current = null;
+    let active  = 0;
+    let savedY  = null;
     let frames = [], thumbs = [], track = null, stage = null;
+    let autoSlideInterval = null; // Menyimpan ID interval auto-slide
 
-    /* -- membuat isi halaman detail -- */
+    // Fungsi kontrol Auto-Slide
+    function startAutoSlide() {
+      stopAutoSlide();
+      if (frames.length <= 1) return; // Tidak perlu slide kalau cuma 1 gambar
+      autoSlideInterval = setInterval(() => {
+        setActive(active + 1);
+      }, 4000); // 4000ms = 4 detik
+    }
+    
+    function stopAutoSlide() {
+      if (autoSlideInterval) clearInterval(autoSlideInterval);
+      autoSlideInterval = null;
+    }
+
+    function resetAutoSlide() {
+      stopAutoSlide();
+      startAutoSlide();
+    }
+
     function render(p, index){
       const next   = projects[(index + 1) % projects.length];
-      const images = p.images.length ? p.images : [null, null, null];   // tanpa gambar -> 3 placeholder
+      const images = p.images.length ? p.images : [null, null, null];
 
       const frameHTML = images.map((src, i) =>
         '<figure class="d-frame" data-i="' + i + '">' +
           '<span class="d-ph">' + p.title + '<small>' + pad(i + 1) + '</small></span>' +
-          (src ? '<img src="' + src + '" alt="' + p.title + ' tampilan ' + (i + 1) + '" decoding="async" onerror="this.remove()">' : "") +
+          (src ? '<img src="' + src + '" alt="' + p.title + ' tampilan ' + (i + 1) + '" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
         '</figure>'
       ).join("");
 
       const thumbHTML = images.map((src, i) =>
         '<button class="d-thumb" data-i="' + i + '" aria-label="Lihat gambar ' + (i + 1) + '">' + pad(i + 1) +
-          (src ? '<img src="' + src + '" alt="" decoding="async" onerror="this.remove()">' : "") +
+          (src ? '<img src="' + src + '" alt="" loading="lazy" decoding="async" onerror="this.remove()">' : "") +
         '</button>'
       ).join("");
 
@@ -260,8 +282,14 @@
         '<span class="d-none">Belum ada link publik.</span>';
 
       content.style.setProperty("--g", p.grad);
+      
+      // Tambahkan tombol d-prev dan d-next ke dalam string HTML
       content.innerHTML =
-        '<section class="d-stage d-anim" style="--i:0" id="d-stage"><div class="d-track" id="d-track">' + frameHTML + '</div></section>' +
+        '<section class="d-stage d-anim" style="--i:0" id="d-stage">' +
+          '<button class="d-nav prev" id="d-prev" aria-label="Gambar sebelumnya">←</button>' +
+          '<div class="d-track" id="d-track">' + frameHTML + '</div>' +
+          '<button class="d-nav next" id="d-next" aria-label="Gambar selanjutnya">→</button>' +
+        '</section>' +
         '<section class="d-info d-anim" style="--i:1">' +
           '<div class="d-col"><h4>Project</h4><h2>' + p.title + '</h2><span class="d-year">' + p.year + '</span></div>' +
           '<div class="d-col"><h4>Info</h4><p>' + p.info + '</p><div class="d-stack">' + p.stack.map(s => "<span>" + s + "</span>").join("") + '</div></div>' +
@@ -276,37 +304,51 @@
       frames = $$(".d-frame", content);
       thumbs = $$(".d-thumb", content);
 
-      frames.forEach(f => f.addEventListener("click", () => setActive(+f.dataset.i)));
-      thumbs.forEach(t => t.addEventListener("click", () => setActive(+t.dataset.i)));
+      frames.forEach(f => f.addEventListener("click", () => { resetAutoSlide(); setActive(+f.dataset.i); }));
+      thumbs.forEach(t => t.addEventListener("click", () => { resetAutoSlide(); setActive(+t.dataset.i); }));
+      
+      // Pasang event listener tombol panah
+      $("#d-prev").addEventListener("click", () => { resetAutoSlide(); setActive(active - 1); });
+      $("#d-next").addEventListener("click", () => { resetAutoSlide(); setActive(active + 1); });
+
+      // Pause auto-slide saat mouse hover di area galeri
+      stage.addEventListener("mouseenter", stopAutoSlide);
+      stage.addEventListener("mouseleave", startAutoSlide);
+
       enableSwipe();
     }
 
-    /* -- menaruh gambar pilihan di tengah galeri -- */
     function setActive(i, instant){
-      active = Math.max(0, Math.min(frames.length - 1, i));
+      // Looping gambar
+      if (i < 0) i = frames.length - 1;
+      if (i >= frames.length) i = 0;
+
+      active = i;
       frames.forEach((f, n) => f.classList.toggle("active", n === active));
       thumbs.forEach((t, n) => t.classList.toggle("active", n === active));
 
       const f = frames[active];
       const x = stage.clientWidth / 2 - (f.offsetLeft + f.offsetWidth / 2);
-      if (instant) track.style.transition = "none";     // penempatan awal tanpa animasi
+      if (instant) track.style.transition = "none";
       track.style.transform = "translateX(" + x + "px)";
       if (instant) { track.offsetWidth; track.style.transition = ""; }
     }
 
-    /* -- geser kiri/kanan dengan jari atau mouse -- */
     function enableSwipe(){
       let startX = null;
-      stage.addEventListener("pointerdown", e => { startX = e.clientX; });
+      stage.addEventListener("pointerdown", e => { 
+        startX = e.clientX; 
+        stopAutoSlide(); // Pause saat mulai geser
+      });
       stage.addEventListener("pointerup", e => {
         if (startX === null) return;
         const dx = e.clientX - startX;
         if (Math.abs(dx) > 50) setActive(active + (dx < 0 ? 1 : -1));
         startX = null;
+        startAutoSlide(); // Lanjut lagi setelah geser
       });
     }
 
-    /* -- buka / tutup -- */
     function open(id){
       const index = projects.findIndex(p => p.id === id);
       if (index < 0) return close();
@@ -315,16 +357,20 @@
       if (wasClosed) savedY = scrollY;
 
       current = projects[index];
-      render(current, index);                 // isi dibuat dulu selagi lapisan masih di luar layar
+      render(current, index);
       setActive(0, true);
       counter.textContent = pad(index + 1) + " / " + pad(projects.length);
       scroller.scrollTop = 0;
       preview.classList.remove("on");
 
-      detail.classList.add("open");           // baru digeser masuk
+      if (lenis) lenis.stop();
+
+      detail.classList.add("open");
       detail.setAttribute("aria-hidden", "false");
       document.body.classList.add("no-scroll");
       if (wasClosed) $("#d-close").focus({ preventScroll: true });
+
+      startAutoSlide(); // Mulai auto slide saat detail dibuka
     }
 
     function close(){
@@ -333,20 +379,24 @@
       detail.setAttribute("aria-hidden", "true");
       document.body.classList.remove("no-scroll");
       current = null;
+      
+      stopAutoSlide(); // Matikan interval saat detail ditutup
 
-      // kembalikan posisi scroll seperti sebelum detail dibuka
-      if (savedY !== null) scrollTo({ top: savedY, behavior: "instant" });
+      if (savedY !== null) {
+        if (lenis) lenis.scrollTo(savedY, { immediate: true });
+        else window.scrollTo({ top: savedY, behavior: "instant" });
+      }
       savedY = null;
+
+      if (lenis) lenis.start();
     }
 
-    /* -- router: hash di URL menentukan buka atau tutup -- */
     function route(){
       const m = location.hash.match(/^#\/work\/([\w-]+)/);
       m ? open(m[1]) : close();
     }
     window.addEventListener("hashchange", route);
 
-    // tutup lewat tombol / Esc: hapus hash dari URL tanpa memicu lompatan scroll
     function closeFromUI(){
       try { history.replaceState(null, "", location.pathname + location.search); }
       catch (e) { location.replace("#work"); return; }
@@ -354,17 +404,15 @@
     }
     $("#d-close").addEventListener("click", closeFromUI);
 
-    /* -- keyboard -- */
     document.addEventListener("keydown", e => {
       if (!detail.classList.contains("open")) return;
       if (e.key === "Escape")     closeFromUI();
-      if (e.key === "ArrowRight") setActive(active + 1);
-      if (e.key === "ArrowLeft")  setActive(active - 1);
+      if (e.key === "ArrowRight") { resetAutoSlide(); setActive(active + 1); }
+      if (e.key === "ArrowLeft")  { resetAutoSlide(); setActive(active - 1); }
     });
 
     window.addEventListener("resize", () => { if (current) setActive(active); });
 
-    /* -- pramuat & decode semua gambar proyek di waktu senggang -- */
     function preloadAll(){
       projects.forEach(p => p.images.forEach(src => {
         const im = new Image();
@@ -377,8 +425,7 @@
     return { route, preloadAll };
   }
 
-
-  /* ===== 11. LOOP ANIMASI (parallax, progress, marquee) ===== */
+  /* ===== 11. LOOP ANIMASI ===== */
   function initLoop(){
     const cursor  = $("#cursor");
     const preview = $("#preview");
@@ -387,37 +434,38 @@
     const track   = $("#track");
     const header  = $(".top");
 
-    // gandakan isi marquee supaya looping mulus
     track.innerHTML += track.innerHTML;
     const marquee = track.getAnimations()[0];
+
     let lastY = scrollY, speed = 1, rate = 1;
     header.classList.toggle("scrolled", scrollY > 40);
 
-    function frame(){
-      // kursor & preview mengikuti mouse dengan gerak "menyusul"
-      follow.cx += (mouse.x - follow.cx) * 0.2;
-      follow.cy += (mouse.y - follow.cy) * 0.2;
-      follow.px += (mouse.x + 24 - follow.px) * 0.12;
-      follow.py += (mouse.y - 115 - follow.py) * 0.12;
-      // pakai properti "translate" (bukan transform) supaya tidak bentrok dengan "scale" di CSS
-      cursor.style.translate  = follow.cx + "px " + follow.cy + "px";
-      preview.style.translate = follow.px + "px " + follow.py + "px";
+    const PARALLAX = reduceMotion ? 0 : 0.08;
 
-      // progress bar, parallax foto, header: hanya diperbarui saat halaman benar-benar di-scroll
+    function frame(){
+      if (canHover) {
+        follow.cx += (mouse.x - follow.cx) * 0.2;
+        follow.cy += (mouse.y - follow.cy) * 0.2;
+        follow.px += (mouse.x + 24 - follow.px) * 0.12;
+        follow.py += (mouse.y - 115 - follow.py) * 0.12;
+        cursor.style.translate  = follow.cx + "px " + follow.cy + "px";
+        preview.style.translate = follow.px + "px " + follow.py + "px";
+      }
+
       const y = scrollY;
       if (y !== lastY) {
         const max = document.documentElement.scrollHeight - innerHeight;
         bar.style.transform = "scaleX(" + (max > 0 ? y / max : 0) + ")";
-        photo.style.setProperty("--py", Math.min(y, innerHeight) * 0.08 + "px");
+        if (PARALLAX) {
+          photo.style.transform = "translate3d(0," + (Math.min(y, innerHeight) * PARALLAX) + "px,0)";
+        }
         header.classList.toggle("scrolled", y > 40);
       }
 
-      // marquee ngebut saat scroll cepat, lalu pelan lagi
-      // (kecepatan baru hanya dipasang kalau berubah cukup jauh, supaya animasinya tidak tersentak)
       speed += (1 + Math.min(Math.abs(y - lastY) * 0.25, 6) - speed) * 0.08;
       lastY = y;
-      if (marquee && Math.abs(speed - rate) > 0.02) {
-        rate = Math.abs(speed - 1) < 0.02 ? 1 : speed;
+      if (marquee && Math.abs(speed - rate) > 0.05) {
+        rate = Math.abs(speed - 1) < 0.05 ? 1 : speed;
         marquee.playbackRate = rate;
       }
 
@@ -426,11 +474,9 @@
     frame();
   }
 
-
-  /* ===== 12. FORM KONTAK (Netlify Forms) ===== */
+  /* ===== 12. FORM KONTAK ===== */
   function initForm(){
     const form = $("#form"), toast = $("#toast");
-
     form.addEventListener("submit", e => {
       e.preventDefault();
       fetch("/", {
@@ -443,18 +489,15 @@
     });
   }
 
-
-  /* ===== 13. JALANKAN SEMUANYA =====
-     Setiap langkah dibungkus safe(): kalau satu bagian error,
-     pesannya muncul di Console (F12) tapi bagian lain dan loader
-     tetap jalan, jadi halaman tidak pernah macet di 0%. */
+  /* ===== 13. JALANKAN SEMUANYA ===== */
   const safe = fn => { try { return fn(); } catch (e) { console.error("Error di " + (fn.name || "fungsi") + ":", e); } };
 
   let detailApi = { route: () => {}, preloadAll: () => {} };
 
+  safe(initSmoothScroll);
   safe(initTheme);
   safe(initNav);
-  safe(renderProjectList);      // harus sebelum reveal & kursor, karena membuat elemennya
+  safe(renderProjectList);
   safe(initReveal);
   safe(initMagnetic);
   safe(initCursor);
@@ -463,9 +506,9 @@
   safe(initForm);
 
   initLoader(() => {
-    safe(initTyping);           // mengetik baru mulai setelah loader selesai
-    safe(detailApi.route);      // kalau URL langsung berisi #/work/..., buka detailnya
-    setTimeout(() => safe(detailApi.preloadAll), 800);   // pramuat gambar proyek
+    safe(initTyping);
+    safe(detailApi.route);
+    setTimeout(() => safe(detailApi.preloadAll), 800);
   });
 
 })();

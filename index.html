@@ -7,10 +7,10 @@
   <meta name="description" content="Portofolio web developer dan UI/UX designer.">
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 
-  <!-- jika JavaScript mati, jangan kunci halaman -->
   <noscript><style>.loader{display:none}.fu,.line>span,.top,.photo{opacity:1!important;transform:none!important;clip-path:none!important}.rv:not(.show),[data-stagger]:not(.show)>*{opacity:1!important}</style></noscript>
 </head>
 <body>
@@ -68,7 +68,7 @@
       </div>
 
       <div class="photo-wrap" id="photo-wrap">
-        <div class="photo">A<img src="img/foto.jpg" alt="Foto profil" onerror="this.remove()"></div>
+        <div class="photo">A<img src="img/foto.jpg" alt="Foto profil" fetchpriority="high" onerror="this.remove()"></div>
       </div>
     </section>
 
@@ -98,7 +98,7 @@
       </div>
     </section>
 
-    <!-- ===== 5. WORK (daftar dibuat otomatis dari projects.js) ===== -->
+    <!-- ===== 5. WORK ===== -->
     <section class="s" id="work">
       <div class="label rv">03 — Selected Work</div>
       <div class="projs" id="projs" data-stagger></div>
@@ -137,18 +137,20 @@
     <a href="#home">Kembali ke atas ↑</a>
   </footer>
 
-  <!-- ===== HALAMAN DETAIL PROYEK (isinya diisi oleh script.js) ===== -->
+  <!-- ===== HALAMAN DETAIL PROYEK ===== -->
   <div class="detail" id="detail" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Detail proyek">
     <div class="d-top">
       <span class="d-count" id="d-count">01 / 04</span>
       <button class="d-close" id="d-close" aria-label="Tutup detail proyek">&gt; Close &lt;</button>
       <span class="d-brand">Akbar ®</span>
     </div>
-    <div class="d-scroll" id="d-scroll">
+    <div class="d-scroll" id="d-scroll" data-lenis-prevent>
       <div id="d-content"></div>
     </div>
   </div>
 
+  <!-- Lenis (smooth scroll) — dari jsDelivr, lebih stabil dari unpkg -->
+  <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
   <script src="projects.js"></script>
   <script src="script.js"></script>
 </body>
