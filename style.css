@@ -212,8 +212,19 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;paddin
 /* ===== 15. RESPONSIF & OPTIMASI MOBILE ===== */
 @media(max-width:900px){
   .burger{display:block}
-  .top nav{position:fixed;inset:0;background:var(--bg);flex-direction:column;justify-content:center;align-items:center;gap:26px;font-size:1.6rem;transform:translateY(-100%);transition:transform .6s var(--ease)}
-  .top nav.open{transform:none}
+  /* FIX BUG NAVBAR: opacity & visibility agar tidak bocor ke layar saat tertutup */
+  .top nav{
+    position:fixed; inset:0; background:var(--bg);
+    flex-direction:column; justify-content:center; align-items:center;
+    gap:26px; font-size:1.6rem;
+    transform:translateY(-100%);
+    opacity:0; visibility:hidden;
+    transition:transform .6s var(--ease), opacity .4s, visibility .6s;
+  }
+  .top nav.open{
+    transform:none; opacity:1; visibility:visible;
+  }
+  
   .hero{grid-template-columns:1fr;padding-top:110px}
   .photo-wrap{justify-self:start;width:70%;max-width:300px;order:-1}
   .row{grid-template-columns:44px 1fr}
@@ -231,9 +242,9 @@ footer{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;paddin
   .d-nav.prev{left:10px}
   .d-nav.next{right:10px}
 
-  .rv { filter: blur(4px); transform: translateY(60px) scale(0.95); }
-  [data-stagger] > * { filter: blur(3px); transform: translateY(50px) scale(0.95); }
-  .photo-wrap { transform: none !important; }
+  /* Animasi tetap full, hanya blur sedikit dikurangi agar tidak terlalu membebani render GPU HP */
+  .rv { filter: blur(8px); transform: translateY(80px) scale(0.95); } 
+  [data-stagger] > * { filter: blur(6px); transform: translateY(70px) scale(0.95); }
 }
 
 /* ===== 16. LENIS SMOOTH SCROLL ===== */

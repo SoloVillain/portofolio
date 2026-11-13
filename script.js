@@ -7,12 +7,11 @@
   const pad = n => String(n).padStart(2, "0");
 
   const html         = document.documentElement;
-  const isTouch      = matchMedia("(pointer: coarse)").matches;
-  const canHover     = !isTouch;
+  const canHover     = matchMedia("(hover:hover)").matches;
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const mouse        = { x: innerWidth / 2, y: innerHeight / 2 };
 
-  // SVG Panah (Menggantikan karakter teks ↗ agar tidak jadi emoji di HP)
+  // SVG Panah (Menggantikan karakter teks ↗)
   const ARROW_SVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>`;
 
   const projects = typeof PROJECTS !== "undefined" ? PROJECTS : [];
@@ -21,7 +20,7 @@
   let lenis = null;
   const HEADER_OFFSET = 70;
 
-  /* ===== 0. SMOOTH SCROLL (Hanya di PC) ===== */
+  /* ===== 0. SMOOTH SCROLL (Aktif di Desktop & Mobile) ===== */
   function initSmoothScroll(){
     document.addEventListener("click", e => {
       const a = e.target.closest('a[href^="#"]');
@@ -43,10 +42,20 @@
       try { history.replaceState(null, "", href); } catch (err) {}
     });
 
-    if (isTouch || typeof window.Lenis !== "function") return;
+    // JIKA LENIS TERSEDIA, JALANKAN DI SEMUA PERANGKAT (HP & PC)
+    if (typeof window.Lenis !== "function") return;
 
-    lenis = new window.Lenis({ lerp: 0.1, wheelMultiplier: 1, smoothWheel: true, syncTouch: false });
-    function raf(time){ lenis.raf(time); requestAnimationFrame(raf); }
+    lenis = new window.Lenis({ 
+      lerp: 0.1, 
+      wheelMultiplier: 1, 
+      smoothWheel: true, 
+      syncTouch: true // <-- Ini yang bikin scroll HP mulus banget
+    });
+    
+    function raf(time){ 
+      lenis.raf(time); 
+      requestAnimationFrame(raf); 
+    }
     requestAnimationFrame(raf);
   }
 
@@ -117,7 +126,6 @@
   function renderProjectList(){
     const box = $("#projs");
     if (!box) return;
-    // Menyisipkan SVG Arrow ke dalam list
     box.innerHTML = projects.map((p, i) =>
       `<a class="proj" href="#/work/${p.id}" data-img="${p.images[0] || ""}" data-grad="${p.grad}">
         <span class="n">${pad(i + 1)}</span>
@@ -219,7 +227,6 @@
         </button>`
       ).join("");
 
-      // Link pakai SVG Arrow
       const links = (p.live ? `<a class="btn fill" href="${p.live}" target="_blank" rel="noopener noreferrer">Live Demo ${ARROW_SVG}</a>` : "") +
                     (p.github ? `<a class="btn line" href="${p.github}" target="_blank" rel="noopener noreferrer">GitHub ${ARROW_SVG}</a>` : "") ||
                     '<span class="d-none">Belum ada link publik.</span>';
@@ -346,7 +353,8 @@
     let lastY = scrollY, speed = 1, rate = 1;
     header.classList.toggle("scrolled", scrollY > 40);
 
-    const PARALLAX = (!reduceMotion && !isTouch) ? 0.08 : 0;
+    // Parallax kembali diaktifkan untuk mobile
+    const PARALLAX = !reduceMotion ? 0.08 : 0;
 
     function frame(){
       if (document.hidden) { requestAnimationFrame(frame); return; }
@@ -361,7 +369,9 @@
       }
 
       const y = scrollY;
-      if (!isTouch && !reduceMotion && y < innerHeight && heroText) {
+      
+      // Hero fade diaktifkan kembali untuk mobile
+      if (!reduceMotion && y < innerHeight && heroText) {
         const p = y / innerHeight;
         heroText.style.opacity = Math.max(0, 1 - p * 1.5);
         heroText.style.transform = `translate3d(0, ${y * 0.25}px, 0)`;
